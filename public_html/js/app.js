@@ -307,7 +307,7 @@ room.game = {
                         this.ball.vx, -this.ball.vy);
             }
             
-            if(this.ball.y > room.bounds.bottom - this.ball.height/2) {
+            if(this.ball.y > room.bounds.bottom - this.ball.height/4) {
                 this.col = false;
                 setRoom(room.score, true);
             }
@@ -347,6 +347,7 @@ room.game = {
                 this.ball.col = true;
                 this.bounce.bind(this.ball)();
                 if(col === 'bottom' || col === 'top') {
+                    if(this.ball.side) return;
                     let dir = -this.ball.vx/Math.abs(this.ball.vx);
                     let dist = ((this.ball.x - this.player.x) / (this.player.width/2)) * dir;
                     let angle = Mathf.clamp360(Mathf.deg(Math.atan2(-this.ball.vy, this.ball.vx)));
@@ -363,30 +364,33 @@ room.game = {
                     }
                     
                     this.moveDir(this.ball, this.ball.velocity, 
-                        Math.cos(angle), Math.sin(angle));
+                        Math.cos(angle), -Math.abs(Math.sin(angle)));
                         //this.ball.vx, -this.ball.vy);
                         
+                        /*
                     this.ball.y = col === 'bottom' ? 
                             this.player.y - this.ball.height/2 - this.player.height/2 - 1 : 
                             this.player.y + this.ball.height/2 + this.player.height/2 + 1;
+                            */
+                    this.ball.y = this.player.y - this.ball.height/2 - this.player.height/2 - 1 ;
                }
                else if(col === 'left' || col === 'right') {
-                   this.moveDir(this.ball, this.ball.velocity, 
+                    this.moveDir(this.ball, this.ball.velocity, 
                         -this.ball.vx, this.ball.vy);
+                    this.ball.side = true;
                }
             }
-            else {
-                //player movement
-                if(key.left.down) {
+            
+            if(key.left.down && !this.ball.side) {
                     this.player.x -= key.shift.down ? this.player.move.slow 
                             : this.player.move.default;
-                }
-
-                if(key.right.down) {
-                    this.player.x += key.shift.down ? this.player.move.slow 
-                            : this.player.move.default;
-                }
             }
+
+            if(key.right.down && !this.ball.side) {
+                this.player.x += key.shift.down ? this.player.move.slow 
+                        : this.player.move.default;
+            }
+            
             this.player.y = this.player.py;
             this.player.x = Mathf.clamp(this.player.x, room.bounds.left 
                     + this.player.width/2, room.bounds.right 
@@ -395,7 +399,7 @@ room.game = {
             this.ball.x = Mathf.clamp(this.ball.x, room.bounds.left 
                     + this.ball.width/2, room.bounds.right - this.ball.width/2);
             this.ball.y = Mathf.clamp(this.ball.y, room.bounds.top 
-                    + this.ball.height/2, room.bounds.bottom - this.ball.height/2);
+                    + this.ball.height/2, room.bounds.bottom);
             
             this.frames++;
             if(this.yourscore.ticker < this.score) {
@@ -407,7 +411,7 @@ room.game = {
             this.yourscore.text = this.yourscore.ticker;
         },
         bounce: function() {
-            this.velocity += 0.1 * (Number(room.game.difficulty) + 1);
+            this.velocity += 0.075 * (Number(room.game.difficulty) + 1);
             this.sprites.next.bind(this)();
         },
         moveTo: function(obj, speed, x, y) {
@@ -509,6 +513,7 @@ room.game = {
         this.ball.reset = function() {
             //this.ball.col.current = this.ball.col.none;
             this.ball.col = false;
+            this.ball.side = false;
             this.ball.position.set(Math.random() > 0.5 ? room.width/4 : 3*room.width/4, room.height/2);
             this.ball.setTexture(this.ball.sprites.container[0]);
             this.ball.spriteIndex = 0;
@@ -693,6 +698,7 @@ room.score = {
         inner.height = room.height;
         
         inner.interactive = true;
+		inner.buttonMode = true;
         
         inner.on('pointerup', function() {
             this.finalized();
