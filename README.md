@@ -3,7 +3,7 @@ A sample game using Pixi JS. I forgot what kind of game is this.
 Has three difficulty with increased speed and scores.
 Enjoy!
 
-Working game link: http://mygame.likesyou.org/games/pongping
+Demo Link: https://letumfalx.github.io/PongPing/index.html
 
 Controls:
 
